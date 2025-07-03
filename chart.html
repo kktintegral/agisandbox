@@ -67,4 +67,21 @@
           return;
         }
 
-        const ctx = this.shadowRoot.getElementById("chart")
+        const ctx = this.shadowRoot.getElementById("chart").getContext("2d");
+        if (this._chart) this._chart.destroy(); // Prevent duplicates
+
+        this._chart = new Chart(ctx, {
+          type: "line",
+          data: config,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false
+          }
+        });
+      }
+    }
+
+    customElements.define("chart-frame", ChartFrame);
+  </script>
+</body>
+</html>

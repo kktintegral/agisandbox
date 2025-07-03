@@ -1,87 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Chart Frame</title>
+  <meta charset="UTF-8">
+  <title>Chart.js CSP Safe</title>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
-      width: 100%;
     }
     canvas {
       width: 100% !important;
       height: 100% !important;
     }
   </style>
-  <!-- Chart.js 2.9.4 (CSP-safe) -->
+  <!-- ✅ Use the exact Chart.js 2.9.4 UMD build -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
 </head>
 <body>
-  <chart-frame data-chart='{
-    "labels": ["Red", "Blue", "Yellow"],
-    "datasets": [{
-      "label": "Test Chart",
-      "data": [12, 19, 3],
-      "fill": false,
-      "borderColor": "#f87171",
-      "tension": 0.1
-    }]
-  }'></chart-frame>
+  <canvas id="chart"></canvas>
 
   <script>
-    class ChartFrame extends HTMLElement {
-      constructor() {
-        super();
-        this.attachShadow({ mode: "open" });
-        this.shadowRoot.innerHTML = `
-          <style>
-            canvas { width: 100%; height: 100%; }
-          </style>
-          <canvas id="chart"></canvas>
-        `;
+    const ctx = document.getElementById('chart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Red', 'Blue', 'Yellow'],
+        datasets: [{
+          label: 'Test Chart',
+          data: [12, 19, 3],
+          borderColor: '#f87171',
+          fill: false,
+          tension: 0.1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
       }
-
-      connectedCallback() {
-        this.renderChart();
-      }
-
-      static get observedAttributes() {
-        return ['data-chart'];
-      }
-
-      attributeChangedCallback(name, oldValue, newValue) {
-        if (name === 'data-chart') this.renderChart();
-      }
-
-      renderChart() {
-        const raw = this.getAttribute('data-chart');
-        if (!raw) return;
-
-        let config;
-        try {
-          config = JSON.parse(raw);
-        } catch (e) {
-          console.error("Invalid JSON in data-chart:", e);
-          return;
-        }
-
-        const ctx = this.shadowRoot.getElementById("chart").getContext("2d");
-        if (this._chart) this._chart.destroy();
-
-        this._chart = new Chart(ctx, {
-          type: "line",
-          data: config,
-          options: {
-            responsive: true,
-            maintainAspectRatio: false
-          }
-        });
-      }
-    }
-
-    customElements.define("chart-frame", ChartFrame);
+    });
   </script>
 </body>
 </html>

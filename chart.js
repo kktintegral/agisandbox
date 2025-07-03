@@ -1,22 +1,49 @@
-const ctx = document.getElementById('myChart').getContext('2d');
-
-new Chart(ctx, {
-  type: 'bar',
-  data: {
-    labels: ['Red', 'Blue', 'Yellow'],
-    datasets: [{
-      label: 'My Chart Data',
-      data: [12, 19, 3],
-      backgroundColor: ['red', 'blue', 'yellow']
-    }]
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      y: {
-        beginAtZero: true
-      }
-    }
+class ChartFrame extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: "open" });
+    this.shadowRoot.innerHTML = `
+      <style> canvas { width: 100%; height: 100%; } </style>
+      <canvas id="chart"></canvas>
+    `;
   }
-});
+
+  connectedCallback() {
+    this.renderChart();
+  }
+
+  static get observedAttributes() {
+    return ['data-chart'];
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    if (name === 'data-chart') this.renderChart();
+  }
+
+  renderChart() {
+    const raw = this.getAttribute('data-chart');
+    if (!raw) return;
+
+    let config;
+    try {
+      config = JSON.parse(raw);
+    } catch (e) {
+      console.error("Invalid JSON in data-chart:", e);
+      return;
+    }
+
+    const ctx = this.shadowRoot.getElementById("chart").getContext("2d");
+    if (this._chart) this._chart.destroy();
+
+    this._chart = new Chart(ctx, {
+      type: "line",
+      data: config,
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  }
+}
+
+customElements.define("chart-frame", ChartFrame);

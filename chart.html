@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <title>ChartFrame</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script type="module" src="chart.js"></script>
   <style>
     body { margin: 0; }
     chart-frame {
@@ -15,57 +16,5 @@
 </head>
 <body>
   <chart-frame></chart-frame>
-
-  <script>
-    class ChartFrame extends HTMLElement {
-      constructor() {
-        super();
-        this.attachShadow({ mode: "open" });
-        this.shadowRoot.innerHTML = `
-          <style> canvas { width: 100%; height: 100%; } </style>
-          <canvas id="chart"></canvas>
-        `;
-      }
-
-      connectedCallback() {
-        this.renderChart();
-      }
-
-      static get observedAttributes() {
-        return ['data-chart'];
-      }
-
-      attributeChangedCallback(name, oldValue, newValue) {
-        if (name === 'data-chart') this.renderChart();
-      }
-
-      renderChart() {
-        const raw = this.getAttribute('data-chart');
-        if (!raw) return;
-
-        let config;
-        try {
-          config = JSON.parse(raw);
-        } catch (e) {
-          console.error("Invalid JSON in data-chart:", e);
-          return;
-        }
-
-        const ctx = this.shadowRoot.getElementById("chart").getContext("2d");
-        if (this._chart) this._chart.destroy(); // Prevent duplicates
-
-        this._chart = new Chart(ctx, {
-          type: "line",
-          data: config,
-          options: {
-            responsive: true,
-            maintainAspectRatio: false
-          }
-        });
-      }
-    }
-
-    customElements.define("chart-frame", ChartFrame);
-  </script>
 </body>
 </html>
